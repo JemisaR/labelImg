@@ -1,3 +1,5 @@
+REM Note: I have custom scripts set to PATH
+call activate_conda.bat
 call conda activate labelimg
 
 :: Set Directory to where this file is.
