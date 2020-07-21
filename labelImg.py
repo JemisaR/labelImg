@@ -125,16 +125,24 @@ class MainWindow(QMainWindow, WindowMixin):
         useDefaultLabelContainer = QWidget()
         useDefaultLabelContainer.setLayout(useDefaultLabelQHBoxLayout)
 
-        # Create a widget for edit and diffc button
-        self.diffcButton = QCheckBox(getStr('useDifficult'))
-        self.diffcButton.setChecked(False)
-        self.diffcButton.stateChanged.connect(self.btnstate)
+        self.defaultLabelShortcut = QShortcut(QKeySequence(Qt.Key_Q), self)
+        self.defaultLabelShortcut.activated.connect(self.toggleDefaultLabel)
+
+        # Create a widget for difficult checkbox
+        self.difficultCheckBox = QCheckBox(getStr('useDifficult'))
+        self.difficultCheckBox.setChecked(False)
+        self.difficultCheckBox.stateChanged.connect(self.btnstate)
+        # And add a shortcut to it
+        self.difficultShortcut = QShortcut(QKeySequence(Qt.Key_E), self)
+        self.difficultShortcut.activated.connect(self.toggleDifficult)
+
+        # Create a widget for edit button
         self.editButton = QToolButton()
         self.editButton.setToolButtonStyle(Qt.ToolButtonTextBesideIcon)
 
         # Add some of widgets to listLayout
         listLayout.addWidget(self.editButton)
-        listLayout.addWidget(self.diffcButton)
+        listLayout.addWidget(self.difficultCheckBox)
         listLayout.addWidget(useDefaultLabelContainer)
 
         # Create and add combobox for showing unique labels in group
@@ -518,6 +526,20 @@ class MainWindow(QMainWindow, WindowMixin):
     def noShapes(self):
         return not self.itemsToShapes
 
+    def toggleDifficult(self):
+        self.toggleCheckBox(self.difficultCheckBox)
+
+    def toggleDefaultLabel(self):
+        self.toggleCheckBox(self.useDefaultLabelCheckbox)
+
+    @staticmethod
+    def toggleCheckBox(checkBox: QCheckBox):
+        checked = checkBox.isChecked()
+        if checked:
+            checkBox.setChecked(False)
+        else:
+            checkBox.setChecked(True)
+
     def toggleAdvancedMode(self, value=True):
         self._beginner = not value
         self.canvas.setEditing(True)
@@ -703,7 +725,7 @@ class MainWindow(QMainWindow, WindowMixin):
         if not item: # If not selected Item, take the first one
             item = self.labelList.item(self.labelList.count()-1)
 
-        difficult = self.diffcButton.isChecked()
+        difficult = self.difficultCheckBox.isChecked()
 
         try:
             shape = self.itemsToShapes[item]
@@ -857,7 +879,7 @@ class MainWindow(QMainWindow, WindowMixin):
             self.canvas.selectShape(self.itemsToShapes[item])
             shape = self.itemsToShapes[item]
             # Add Chris
-            self.diffcButton.setChecked(shape.difficult)
+            self.difficultCheckBox.setChecked(shape.difficult)
 
     def labelItemChanged(self, item):
         shape = self.itemsToShapes[item]
@@ -890,7 +912,7 @@ class MainWindow(QMainWindow, WindowMixin):
             text = self.defaultLabelTextLine.text()
 
         # Add Chris
-        self.diffcButton.setChecked(False)
+        self.difficultCheckBox.setChecked(False)
         if text is not None:
             self.prevLabelText = text
             generate_color = generateColorByText(text)
@@ -1517,9 +1539,10 @@ def get_main_app(argv=[]):
 
 
 def main():
-    '''construct main app and run it'''
+    """construct main app and run it"""
     app, _win = get_main_app(sys.argv)
     return app.exec_()
+
 
 if __name__ == '__main__':
     sys.exit(main())
